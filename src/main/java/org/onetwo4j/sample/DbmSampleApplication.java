@@ -1,48 +1,38 @@
 package org.onetwo4j.sample;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.onetwo.common.db.sqlext.ExtQuery.K;
-import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
+import org.onetwo.common.db.BaseEntityManager;
+import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.spring.EnableDbm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
+
 
 @SpringBootApplication
 @EnableDbm
-@RestController("user")
+@RestController
 public class DbmSampleApplication {
-
-	@RequestMapping(value="", method=RequestMethod.GET)
-	public Object list(String userName){
-		List<User> users = User.findList("userName", userName, K.IF_NULL, IfNull.Ignore);
-		return users;
-	}
-
-	@RequestMapping(value="/view/{id}", method=RequestMethod.GET)
-	public Object view(@PathVariable("id")Long id){
-		User user = User.findById(id);
-		return user;
-	}
-
-	@RequestMapping(value="batchInsert", method=RequestMethod.GET)
-	public Object batchInser(int count){
-		List<User> users = new ArrayList<>();
-		for (int i = 0; i < count; i++) {
-			User user = new User();
-			user.setUserName("test-username-"+i);
-			user.setPassword("123456");
-			users.add(user);
+	@Service
+	@Transactional
+	public static class UserService {
+		@Autowired
+		private BaseEntityManager baseEntityManager;
+		
+		public Page<User> findPage(Integer pageNo){
+			Page<User> page = Page.create(pageNo);
+			this.baseEntityManager.findPage(User.class, page);
+			return page;
 		}
-		int insertCount = User.batchInsert(users);
-		return "insert "+insertCount+" users.";
 	}
-	
+	/*****
+	 * 批量插入10条数据: http://localhost:8080/user/batchInsert?count=10 
+	 * 查看数据： http://localhost:8080/user/page
+	 * 其他参见 {@linkplain UserController UserController}
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(DbmSampleApplication.class, args);
 	}
