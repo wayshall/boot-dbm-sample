@@ -1,6 +1,6 @@
 package org.onetwo4j.sample;
 
-import org.onetwo.common.db.BaseEntityManager;
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.springframework.beans.factory.annotation.Autowired;
